@@ -1,0 +1,148 @@
+// Custom Navy/Charcoal/Amber theme for FitSpec
+@use '@angular/material' as mat;
+
+:root {
+  --fs-navy: #1a237e;
+  --fs-navy-light: #283593;
+  --fs-navy-dark: #0d1147;
+  --fs-charcoal: #263238;
+  --fs-charcoal-dark: #1b2327;
+  --fs-amber: #ffc107;
+  --fs-amber-light: #ffd54f;
+  --fs-amber-dark: #ff8f00;
+  --fs-green: #4caf50;
+  --fs-green-dark: #2e7d32;
+  --fs-red: #f44336;
+  --fs-bg: #f5f7fa;
+  --fs-text: #263238;
+  --fs-text-secondary: #555;
+  --fs-text-muted: #888;
+  --fs-text-light: #999;
+  --fs-border: #e0e0e0;
+  --fs-border-light: #eee;
+  --fs-gradient-navy: linear-gradient(135deg, #1a237e, #263238);
+  --fs-gradient-hero: linear-gradient(135deg, #0d1147 0%, #1a237e 40%, #37474f 100%);
+  --fs-gradient-amber: linear-gradient(135deg, #ffc107, #ffab00);
+  --fs-shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+  --fs-shadow-md: 0 4px 16px rgba(0,0,0,0.12);
+  --fs-shadow-lg: 0 8px 32px rgba(0,0,0,0.16);
+  --fs-shadow-xl: 0 12px 48px rgba(0,0,0,0.20);
+  --fs-radius: 12px;
+  --fs-radius-lg: 16px;
+}
+
+html {
+  @include mat.theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+      tertiary: mat.$orange-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: var(--fs-bg);
+}
+
+// Global link reset
+a { text-decoration: none; color: inherit; }
+
+// Scrollbar styling
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #999; }
+
+// Animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Utility: subtle pattern background
+.fs-pattern-bg {
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.02) 40px,
+      rgba(255,255,255,0.02) 80px
+    );
+}
+
+// ──── Dark Mode ────
+body.dark-mode {
+  --fs-navy: #283593;
+  --fs-navy-dark: #1a237e;
+  --fs-charcoal: #1e1e1e;
+  --fs-charcoal-dark: #121212;
+  --fs-bg: #121212;
+  --fs-shadow-sm: 0 2px 8px rgba(0,0,0,0.32);
+  --fs-shadow-md: 0 4px 16px rgba(0,0,0,0.40);
+  --fs-shadow-lg: 0 8px 32px rgba(0,0,0,0.48);
+  --fs-shadow-xl: 0 12px 48px rgba(0,0,0,0.56);
+
+  // Angular Material dark overrides
+  --mdc-filled-button-container-color: #1a237e;
+  --mdc-outlined-button-outline-color: rgba(255,255,255,0.3);
+  --mat-card-container-color: #1e1e1e;
+  --mat-toolbar-container-background-color: #0d1117;
+  --mat-sidenav-content-background-color: #121212;
+  --mat-select-panel-background-color: #1e1e1e;
+  --mat-option-label-text-color: #e0e0e0;
+  --mat-menu-container-color: #1e1e1e;
+  --mdc-elevated-card-container-color: #1e1e1e;
+  --mdc-outlined-card-container-color: #1e1e1e;
+  --mdc-outlined-card-outline-color: rgba(255,255,255,0.12);
+  --mat-paginator-container-background-color: #1e1e1e;
+  --mat-paginator-container-text-color: #e0e0e0;
+
+  color: #e0e0e0;
+  background: #121212;
+}
+
+// Dark mode scrollbar overrides
+body.dark-mode ::-webkit-scrollbar-track { background: #1e1e1e; }
+body.dark-mode ::-webkit-scrollbar-thumb { background: #555; }
+body.dark-mode ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+// Dark mode typography overrides
+body.dark-mode .product-name,
+body.dark-mode .product-title,
+body.dark-mode .section-title,
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
+  color: #e0e0e0;
+}
+body.dark-mode .product-brand,
+body.dark-mode .product-price {
+  color: #90caf9;
+}

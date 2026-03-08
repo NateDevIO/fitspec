@@ -1,0 +1,58 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fitspec-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "FitSpec_Dev123!"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "FitSpec_Dev123!" -Q "SELECT 1" -C -b
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: fitspec-mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: fitspec
+    volumes:
+      - mongo-data:/data/db
+
+  api:
+    build:
+      context: .
+      dockerfile: src/FitSpec.API/Dockerfile
+    container_name: fitspec-api
+    ports:
+      - "5062:5062"
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=FitSpec;User Id=sa;Password=FitSpec_Dev123!;TrustServerCertificate=true"
+      ConnectionStrings__MongoDb: "mongodb://mongodb:27017/fitspec"
+      Claude__ApiKey: "${CLAUDE_API_KEY:-}"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      mongodb:
+        condition: service_started
+
+  ui:
+    build:
+      context: src/fitspec-ui
+      dockerfile: Dockerfile
+    container_name: fitspec-ui
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+
+volumes:
+  sqlserver-data:
+  mongo-data:

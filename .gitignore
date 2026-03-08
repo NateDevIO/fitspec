@@ -1,0 +1,39 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.vs/
+*.DotSettings.user
+packages/
+*.nupkg
+project.lock.json
+.vs/
+
+# Angular
+src/fitspec-ui/node_modules/
+src/fitspec-ui/dist/
+src/fitspec-ui/.angular/
+src/fitspec-ui/.sass-cache/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+*.env
+appsettings.Development.json
+
+# ML Models
+*.zip
+!src/FitSpec.ML/Models/.gitkeep
+
+# Docker
+docker-compose.override.yml
