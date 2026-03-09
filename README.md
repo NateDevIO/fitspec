@@ -1,21 +1,71 @@
-# FitSpec — Vehicle Parts Fitment Finder
+# FitSpec — Automotive Parts Fitment & Recommendation Engine
 
-Full-stack automotive parts fitment application built with **Angular 21**, **ASP.NET Core 10**, **SQL Server**, and **MongoDB**. Provides verified compatibility data for aftermarket parts, accessories, and modifications across 150+ products and 30 brands.
+**[Live Demo → fitspec.natedev.io](https://fitspec.natedev.io)**
+
+FitSpec solves the automotive aftermarket's core conversion problem: getting the right part on the right vehicle, every time. Users select their vehicle by year, make, model, and trim, then browse a catalog of verified-compatible parts across multiple categories — with AI-powered recommendations, install guides, and a fitment assistant built in.
+
+The fitment data model reflects how aftermarket automotive parts actually work: year/make/model/trim specificity, receiver classes, bulb types, wiring configurations, and cross-category compatibility patterns. Every architectural decision maps to a real e-commerce outcome.
+
+---
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Angular 21 (standalone components, signals, Material 3) |
-| Backend | ASP.NET Core 10, Dapper + EF Core, API versioning |
-| SQL Database | SQL Server 2022 (vehicles, products, fitment mappings, orders) |
-| Document Store | MongoDB 7 (reviews, product catalog, Q&A) |
-| ML | ML.NET (product recommendations) |
-| Real-time | SignalR (inventory updates) |
-| AI | Claude API (fitment assistant, install guides) |
-| Infrastructure | Docker Compose (4 containers), nginx reverse proxy |
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| **Frontend** | Angular 21 (standalone components, signals, Material 3) | Enterprise-standard SPA framework with custom theming |
+| **Backend** | ASP.NET Core 10, Dapper + EF Core, API versioning | Current release, production-grade REST API |
+| **SQL Database** | SQL Server 2022 / Azure SQL | Relational fitment data with stored procedures via Dapper for performance-critical queries |
+| **Document Store** | MongoDB 7 / Atlas | Flexible schema for reviews, Q&A, and category-specific product metadata |
+| **ML** | ML.NET (matrix factorization) | In-process recommendations with no external API dependencies |
+| **Real-time** | SignalR | Inventory push updates |
+| **AI** | Anthropic Claude API | Fitment assistant chat, dynamic install guides, certificates, spec sheets |
+| **Infrastructure** | Docker Compose (local), Azure App Service + Static Web Apps (prod) | Full production deployment with CI/CD |
+
+---
 
 ## Architecture
+
+### Production (Azure)
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Azure Static Web Apps                        │
+│                     Angular 21 SPA (CDN + SSL)                      │
+│                      fitspec.natedev.io                             │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │ HTTPS
+                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Azure App Service (B1)                         │
+│                   ASP.NET Core .NET 10 Web API                      │
+│                    fitspec-api.azurewebsites.net                    │
+│                                                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────┐ │
+│  │  Controllers │  │   ML.NET     │  │   Claude API Integration  │ │
+│  │  & Middleware │  │  Prediction  │  │   (Fitment Assistant,     │ │
+│  │              │  │   Engine     │  │    Install Guides,        │ │
+│  │              │  │              │  │    Certificates)          │ │
+│  └──────┬───────┘  └──────┬───────┘  └───────────────────────────┘ │
+│         │                 │                                         │
+│  ┌──────┴─────────────────┴──────────────────────────────────────┐ │
+│  │              Data Access Layer (Dapper + EF Core)              │ │
+│  └──────┬──────────────────────────────────┬─────────────────────┘ │
+└─────────┼──────────────────────────────────┼───────────────────────┘
+          │                                  │
+          ▼                                  ▼
+┌──────────────────────┐        ┌──────────────────────┐
+│   Azure SQL Database │        │   MongoDB Atlas (M0)  │
+│                      │        │                       │
+│  • Vehicles (1,747)  │        │  • Product Reviews    │
+│  • Products (150)    │        │  • Q&A Threads (330)  │
+│  • FitmentMappings   │        │  • Extended Catalog   │
+│    (174,295)         │        │    Metadata            │
+│  • Orders (4,500)    │        │                       │
+│  • Stored Procedures │        │                       │
+└──────────────────────┘        └──────────────────────┘
+```
+
+### Local Development (Docker Compose)
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
@@ -31,7 +81,7 @@ Full-stack automotive parts fitment application built with **Angular 21**, **ASP
                               └───────────┘          └───────────┘
 ```
 
-The Angular app is served by nginx, which also reverse-proxies `/api/` and `/hubs/` requests to the .NET API container. All API calls from the frontend use relative URLs (`/api/v1/...`).
+---
 
 ## Features
 
@@ -58,16 +108,50 @@ The Angular app is served by nginx, which also reverse-proxies `/api/` and `/hub
 21. **Dark Mode** — System-aware theme toggle with CSS custom properties
 22. **Global Search** — Header autocomplete with typeahead
 
-## Prerequisites
+---
+
+## Design Decisions
+
+### Polyglot Persistence (SQL Server + MongoDB)
+Fitment data is deeply relational — vehicles, products, and their many-to-many compatibility mappings require referential integrity and performant joins. Reviews, Q&A, and extended product metadata have variable schemas (a hitch and a headlight have completely different spec sheets) and are naturally document-oriented. Using both databases is an intentional architectural choice, not complexity for its own sake.
+
+### Dapper + EF Core Hybrid
+Dapper handles the performance-critical fitment queries via stored procedures — these power the core user experience and need to be fast. EF Core handles migrations, schema management, and simpler CRUD operations where developer velocity matters more than raw query speed. This reflects how production .NET applications actually make data access decisions.
+
+### ML.NET Over External APIs
+The recommendation engine runs entirely within the .NET ecosystem using ML.NET, with no external API dependencies or Python services. The trained model is loaded once at startup and serves predictions in-process, keeping response times low.
+
+---
+
+## Data Model
+
+The core schema centers on the `FitmentMappings` junction table, which links vehicles to compatible products. This many-to-many relationship is the heart of the application.
+
+```
+Makes (30) ──┐
+             ├── Vehicles (1,747) ──── FitmentMappings (174,295) ──── Products (150)
+Models (180) ┘                                                            │
+                                                                    Categories (20)
+
+Orders (4,500) ──── OrderItems (7,464)  →  ML.NET Training Data
+```
+
+Stored procedures (`sp_GetCompatibleProducts`, `sp_GetVehicleCascade`, `sp_GetCategoryBreakdown`) handle the performance-critical fitment queries via Dapper.
+
+---
+
+## Quick Start
+
+### Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [Git](https://git-scm.com/)
 
-## Quick Start
+### Run the Full Stack
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/<your-username>/fitspec.git
+   git clone https://github.com/NateDevIO/fitspec.git
    cd fitspec
    ```
 
@@ -99,16 +183,44 @@ The Angular app is served by nginx, which also reverse-proxies `/api/` and `/hub
    - API (Swagger): [http://localhost:5062/swagger](http://localhost:5062/swagger) (development only)
    - Admin panel: [http://localhost:4200/admin](http://localhost:4200/admin)
 
+### Run Tests
+
+```bash
+dotnet test tests/FitSpec.Tests
+```
+
+---
+
+## Azure Deployment
+
+FitSpec is deployed on Azure's free and low-cost tiers:
+
+| Service | Resource | Tier | Monthly Cost |
+|---------|----------|------|-------------|
+| API | Azure App Service | B1 Basic | ~$13 |
+| Frontend | Azure Static Web Apps | Free | $0 |
+| SQL Database | Azure SQL | Free (32GB) | $0 |
+| Document DB | MongoDB Atlas | M0 Free (512MB) | $0 |
+| **Total** | | | **~$13/mo** |
+
+CI/CD is handled by GitHub Actions workflows:
+- **FitSpec CI** — builds and tests on every push
+- **Deploy API to Azure** — publishes to App Service on pushes to `src/`
+- **Azure Static Web Apps CI/CD** — auto-deploys the Angular SPA
+
+---
+
 ## Project Structure
 
 ```
 fitspec/
 ├── docker-compose.yml          # 4-service orchestration
 ├── .env                        # Secrets (gitignored)
+├── .github/workflows/          # CI/CD pipeline definitions
 ├── scripts/
 │   └── setup-dev.sh            # Database setup & seeding
 ├── infra/
-│   └── seed/                   # SQL + MongoDB seed scripts
+│   └── seed/                   # SQL + MongoDB seed scripts (00-18)
 ├── src/
 │   ├── FitSpec.API/            # ASP.NET Core 10 API
 │   │   ├── Controllers/        # REST endpoints (versioned)
@@ -126,7 +238,8 @@ fitspec/
 │       │   └── features/       # Feature components
 │       ├── nginx.conf          # Reverse proxy config
 │       └── Dockerfile
-└── tests/                      # Test projects
+└── tests/
+    └── FitSpec.Tests/          # xUnit unit & integration tests
 ```
 
 ## Configuration
@@ -140,14 +253,12 @@ fitspec/
 | `ConnectionStrings__MongoDb` | MongoDB connection string | Set in docker-compose.yml |
 | `AllowedOrigins__0` | CORS allowed origin | Defaults to `http://localhost:4200` |
 
-### Azure Deployment
-
 When deploying to Azure, configure these as **App Settings** or environment variables:
 
 - `ConnectionStrings__DefaultConnection` — Azure SQL connection string
-- `ConnectionStrings__MongoDb` — Azure Cosmos DB (MongoDB API) or MongoDB Atlas connection string
+- `ConnectionStrings__MongoDb` — MongoDB Atlas connection string
 - `CLAUDE_API_KEY` — Anthropic API key
-- `AllowedOrigins__0` — Your Azure app URL (e.g., `https://fitspec.azurewebsites.net`)
+- `AllowedOrigins__0` — Your Azure app URL (e.g., `https://fitspec.natedev.io`)
 
 The `.env` file is gitignored and must be recreated in each environment.
 
@@ -205,6 +316,18 @@ docker compose down           # Stop containers (keep data)
 docker compose down -v        # Stop and delete volumes (reset databases)
 ```
 
+---
+
+## About the Developer
+
+Built by **Nate Allen** — a software engineer with 12+ years of e-commerce experience who understands that fitment accuracy is the difference between a conversion and a return.
+
+- **Portfolio:** [natedev.io](https://natedev.io)
+- **LinkedIn:** [linkedin.com/in/natedev](https://linkedin.com/in/natedev)
+- **GitHub:** [github.com/NateDevIO](https://github.com/NateDevIO)
+
+---
+
 ## License
 
-This is a portfolio project. All rights reserved.
+This project is a portfolio demonstration and is not intended for commercial use.

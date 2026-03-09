@@ -14,7 +14,7 @@ INSERT INTO Categories (Id, Name, Slug, Icon, ParentCategoryId, SortOrder) VALUE
 
 -- Towing Subcategories (ParentCategoryId = 1)
 INSERT INTO Categories (Id, Name, Slug, Icon, ParentCategoryId, SortOrder) VALUES
-(5,  'Trailer Hitches',    'trailer-hitches',    'tow',           1, 1),
+(5,  'Trailer Hitches',    'trailer-hitches',    'rv_hookup',     1, 1),
 (6,  'Wiring Harnesses',   'wiring-harnesses',   'cable',         1, 2),
 (7,  'Ball Mounts',        'ball-mounts',         'sports_soccer', 1, 3),
 (8,  'Brake Controllers',  'brake-controllers',   'speed',         1, 4);
