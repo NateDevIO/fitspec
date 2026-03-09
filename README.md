@@ -1,12 +1,12 @@
 # FitSpec — Vehicle Parts Fitment Finder
 
-Full-stack automotive parts fitment application built with **Angular 19**, **ASP.NET Core 10**, **SQL Server**, and **MongoDB**. Provides verified compatibility data for aftermarket parts, accessories, and modifications across 150+ products and 30 brands.
+Full-stack automotive parts fitment application built with **Angular 21**, **ASP.NET Core 10**, **SQL Server**, and **MongoDB**. Provides verified compatibility data for aftermarket parts, accessories, and modifications across 150+ products and 30 brands.
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Angular 19 (standalone components, signals, Material 3) |
+| Frontend | Angular 21 (standalone components, signals, Material 3) |
 | Backend | ASP.NET Core 10, Dapper + EF Core, API versioning |
 | SQL Database | SQL Server 2022 (vehicles, products, fitment mappings, orders) |
 | Document Store | MongoDB 7 (reviews, product catalog, Q&A) |
@@ -120,7 +120,7 @@ fitspec/
 │   │   ├── Migrations/         # EF Core migrations
 │   │   └── Repositories/
 │   ├── FitSpec.ML/             # ML.NET recommendation engine
-│   └── fitspec-ui/             # Angular 19 SPA
+│   └── fitspec-ui/             # Angular 21 SPA
 │       ├── src/app/
 │       │   ├── core/           # Services, state, interceptors, models
 │       │   └── features/       # Feature components
