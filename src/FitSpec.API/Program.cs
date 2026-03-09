@@ -89,6 +89,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Angular");
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 app.MapControllers();
 app.MapHub<FitSpec.API.Hubs.InventoryHub>("/hubs/inventory");
 
