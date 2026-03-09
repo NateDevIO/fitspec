@@ -298,6 +298,8 @@ import { PriceAlertComponent } from '../price-alert/price-alert.component';
     .lightbox-image {
       max-width: 90vw; max-height: 90vh;
       object-fit: contain; border-radius: 8px;
+      background: white;
+      padding: 16px;
       animation: lightboxScaleIn 0.25s ease-out;
     }
     @keyframes lightboxScaleIn {

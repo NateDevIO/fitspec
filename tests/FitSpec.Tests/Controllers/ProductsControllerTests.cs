@@ -20,8 +20,14 @@ public class ProductsControllerTests
     [Fact]
     public async Task GetProduct_Found_ShouldReturnOk()
     {
-        var product = new ProductDetailDto(1, "TOW-CURT-001", "CURT Class III Hitch", "Fits most trucks",
-            "CURT", 249.99m, null, 5, "Trailer Hitches", true, 45.5m, DateTime.UtcNow, null);
+        var product = new ProductDetailDto
+        {
+            Id = 1, SKU = "TOW-CURT-001", Name = "CURT Class III Hitch",
+            Description = "Fits most trucks", Brand = "CURT", Price = 249.99m,
+            ImageUrl = null, CategoryId = 5, CategoryName = "Trailer Hitches",
+            IsVerified = true, Weight = 45.5m, CreatedAt = DateTime.UtcNow,
+            ExtendedSpecs = null
+        };
         _productRepo.GetProductByIdAsync(1).Returns(product);
 
         var result = await _controller.GetProduct(1);
