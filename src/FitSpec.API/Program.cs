@@ -1,3 +1,4 @@
+// FitSpec API — ASP.NET Core 10
 using Asp.Versioning;
 using FitSpec.Core.Interfaces;
 using FitSpec.Data;
