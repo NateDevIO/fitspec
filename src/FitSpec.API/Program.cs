@@ -4,6 +4,7 @@ using FitSpec.Core.Interfaces;
 using FitSpec.Data;
 using FitSpec.Data.Repositories;
 using FitSpec.ML;
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,7 +90,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Angular");
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapGet("/health", async (IDapperConnectionFactory db) =>
+{
+    using var conn = db.CreateConnection();
+    await conn.ExecuteScalarAsync<int>("SELECT 1");
+    return Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+});
 app.MapControllers();
 app.MapHub<FitSpec.API.Hubs.InventoryHub>("/hubs/inventory");
 
