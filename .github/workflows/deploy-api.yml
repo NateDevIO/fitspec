@@ -1,0 +1,34 @@
+name: Deploy API to Azure
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '!src/fitspec-ui/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore src/FitSpec.API/FitSpec.API.csproj
+
+      - name: Build
+        run: dotnet build src/FitSpec.API/FitSpec.API.csproj --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish src/FitSpec.API/FitSpec.API.csproj --configuration Release --no-build --output ./publish
+
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: fitspec-api
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
