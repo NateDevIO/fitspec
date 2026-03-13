@@ -90,11 +90,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Angular");
+
+var lastDbPing = DateTime.MinValue;
 app.MapGet("/health", async (IDapperConnectionFactory db) =>
 {
-    using var conn = db.CreateConnection();
-    await conn.ExecuteScalarAsync<int>("SELECT 1");
-    return Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow });
+    var now = DateTime.UtcNow;
+    if ((now - lastDbPing).TotalMinutes >= 5)
+    {
+        using var conn = db.CreateConnection();
+        await conn.ExecuteScalarAsync<int>("SELECT 1");
+        lastDbPing = now;
+    }
+    return Results.Ok(new { status = "healthy", timestamp = now });
 });
 app.MapControllers();
 app.MapHub<FitSpec.API.Hubs.InventoryHub>("/hubs/inventory");
